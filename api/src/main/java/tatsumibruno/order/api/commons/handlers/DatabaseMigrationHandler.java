@@ -1,4 +1,4 @@
-package tatsumibruno.order.api.commons.handlers.db;
+package tatsumibruno.order.api.commons.handlers;
 
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;

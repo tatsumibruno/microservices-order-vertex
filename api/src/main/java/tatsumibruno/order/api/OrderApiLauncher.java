@@ -13,9 +13,9 @@ import io.vertx.core.json.jackson.DatabindCodec;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.BodyHandler;
 import tatsumibruno.order.api.commons.ErrorResponse;
-import tatsumibruno.order.api.commons.handlers.db.DatabaseHandler;
+import tatsumibruno.order.api.commons.handlers.DatabaseHandler;
 import tatsumibruno.order.api.create_order.CreateOrderApiHandler;
-import tatsumibruno.order.api.query_order.FinishedOrdersKafkaHandler;
+import tatsumibruno.order.api.query_order.OrdersStatusChangesKafkaHandler;
 import tatsumibruno.order.api.query_order.QueryOrderApiHandler;
 
 import java.util.TimeZone;
@@ -51,7 +51,7 @@ public class OrderApiLauncher {
     }
 
     private void registerKafkaHandlers() {
-      FinishedOrdersKafkaHandler.INSTANCE.register(vertx);
+      OrdersStatusChangesKafkaHandler.INSTANCE.register(vertx);
     }
 
     private Router registerApiRouter() {

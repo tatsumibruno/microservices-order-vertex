@@ -1,7 +1,6 @@
-package tatsumibruno.order.api.commons.handlers.db;
+package tatsumibruno.order.api.commons.handlers;
 
 import io.vertx.core.Future;
-import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
@@ -10,7 +9,6 @@ import io.vertx.pgclient.PgPool;
 import io.vertx.sqlclient.PoolOptions;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
-import tatsumibruno.order.api.commons.handlers.InfrastructureHandler;
 
 import java.util.List;
 

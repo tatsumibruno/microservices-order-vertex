@@ -1,8 +1,7 @@
-package tatsumibruno.order.api.commons.handlers.db;
+package tatsumibruno.order.api.commons.handlers;
 
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
-import io.vertx.core.Promise;
 import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
 import io.vertx.pgclient.PgPool;
@@ -24,8 +23,9 @@ public class DatabaseTransactionHandler {
     this.databasePool = databasePool;
   }
 
-  public void addOperation(String query, List<Object> params) {
+  public DatabaseTransactionHandler addOperation(String query, List<Object> params) {
     operations.add(new DatabaseTransactionOperation(query, params));
+    return this;
   }
 
   public Future<Void> execute() {
@@ -42,7 +42,7 @@ public class DatabaseTransactionHandler {
               .onSuccess(unused ->
                 connection.close()
                   .onSuccess(closeConnectionHandler -> {
-                    LOGGER.info("Transaction with " + operations.size() + " completed");
+                    LOGGER.info("Transaction with " + operations.size() + " operations completed");
                     resultHandler.complete();
                   })
                   .onFailure(failure -> {

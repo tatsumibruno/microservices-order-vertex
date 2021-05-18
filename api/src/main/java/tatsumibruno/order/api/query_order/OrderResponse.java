@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.ToString;
 import tatsumibruno.order.api.commons.Constants;
-import tatsumibruno.order.api.new_order.OrderStatus;
 
 import java.time.ZonedDateTime;
 import java.util.UUID;

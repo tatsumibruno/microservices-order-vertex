@@ -18,10 +18,10 @@ import io.vertx.kafka.client.producer.KafkaProducer;
 import io.vertx.kafka.client.producer.KafkaProducerRecord;
 import tatsumibruno.order.api.commons.ErrorResponse;
 import tatsumibruno.order.api.commons.handlers.ApiHandler;
+import tatsumibruno.order.api.commons.infra.KafkaUtils;
+import tatsumibruno.order.api.database.OrderQueries;
 
 import java.time.ZonedDateTime;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
@@ -37,41 +37,17 @@ public enum CreateOrderApiHandler implements ApiHandler {
   @Override
   public void register(Vertx vertx, Router router) {
     LOGGER.info("Registering CreateOrderApiHandler...");
-    KafkaProducer<String, String> producer = kafkaProducer(vertx);
+    KafkaProducer<String, String> producer = KafkaUtils.producer(vertx);
     router.post("/orders")
       .handler(getValidationHandler(vertx))
       .handler(ctx -> {
-        LOGGER.info("Recebendo novo pedido");
         HttpServerResponse response = ctx.response();
-        OrderRequest orderRequest = Json.decodeValue(ctx.getBodyAsString(), OrderRequest.class);
-        CreatedOrder createdOrder = new CreatedOrder(UUID.randomUUID(),
-          ZonedDateTime.now(),
-          orderRequest.getCustomerName(),
-          orderRequest.getCustomerEmail(),
-          orderRequest.getDeliveryAddress());
-        createdOrder.save()
-          .onSuccess(unused -> {
-            LOGGER.info("Pedido criado no banco com sucesso, agora será enviado ao tópico new-orders. " + createdOrder);
-            producer.send(KafkaProducerRecord.create("new-orders",
-              createdOrder.getCode().toString(),
-              Json.encode(createdOrder)));
-            response.end(Json.encode(createdOrder));
-          })
-          .onFailure(failure -> {
-            LOGGER.info("Erro ao inserir pedido no banco. " + createdOrder);
-            response.setStatusCode(400);
-            response.end(Json.encode(ErrorResponse.of(failure, failure.getMessage())));
-          });
+        String bodyRequest = ctx.getBodyAsString();
+        LOGGER.info("Receiving new order: " + bodyRequest);
+        OrderRequest orderRequest = Json.decodeValue(bodyRequest, OrderRequest.class);
+        CreatedOrder createdOrder = new CreatedOrder(UUID.randomUUID(), ZonedDateTime.now(), orderRequest.toOrderCustomer());
+        persistOrder(producer, response, createdOrder);
       });
-  }
-
-  private KafkaProducer<String, String> kafkaProducer(Vertx vertx) {
-    Map<String, String> config = new HashMap<>();
-    config.put("bootstrap.servers", "localhost:9092");
-    config.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-    config.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-    config.put("acks", "1");
-    return KafkaProducer.create(vertx, config);
   }
 
   private ValidationHandler getValidationHandler(Vertx vertx) {
@@ -86,5 +62,21 @@ public enum CreateOrderApiHandler implements ApiHandler {
       .builder(parser)
       .body(new JsonBodyProcessorImpl(new SchemaValidator(schema)))
       .build();
+  }
+
+  private void persistOrder(KafkaProducer<String, String> producer, HttpServerResponse response, CreatedOrder createdOrder) {
+    OrderQueries.INSTANCE.insert(createdOrder.toDBModel())
+      .onSuccess(unused -> {
+        LOGGER.info("Order created on database, sending to topic 'orders-created'. " + createdOrder);
+        producer.send(KafkaProducerRecord.create("orders-created",
+          createdOrder.getCode().toString(),
+          Json.encode(createdOrder)));
+        response.end(Json.encode(createdOrder));
+      })
+      .onFailure(failure -> {
+        LOGGER.info("Error while persist order on database: " + createdOrder);
+        response.setStatusCode(400);
+        response.end(Json.encode(ErrorResponse.of(failure, failure.getMessage())));
+      });
   }
 }

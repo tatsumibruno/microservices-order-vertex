@@ -8,7 +8,7 @@ import io.vertx.core.json.Json;
 import io.vertx.ext.web.Router;
 import tatsumibruno.order.api.commons.ErrorResponse;
 import tatsumibruno.order.api.commons.handlers.ApiHandler;
-import tatsumibruno.order.api.commons.handlers.db.DatabaseHandler;
+import tatsumibruno.order.api.commons.handlers.DatabaseHandler;
 
 import java.util.List;
 import java.util.TimeZone;
@@ -24,9 +24,9 @@ public enum QueryOrderApiHandler implements ApiHandler {
     LOGGER.info("Registering QueryOrderApiHandler...");
     router.get("/orders/:code")
       .handler(ctx -> {
-        LOGGER.info("Consulta de Pedido");
         HttpServerResponse response = ctx.response();
         String code = ctx.pathParam("code");
+        LOGGER.info("Searching for order " + code);
         DatabaseHandler.INSTANCE.executeQuery("SELECT * FROM ORDERS WHERE CODE = $1", List.of(code))
           .onSuccess(rowSetHandler -> {
             if (rowSetHandler.size() == 0) {
@@ -45,7 +45,7 @@ public enum QueryOrderApiHandler implements ApiHandler {
             });
           })
           .onFailure(failure -> {
-            LOGGER.error("Error while process endpoint GET /orders/:code", failure);
+            LOGGER.error("Error while process endpoint GET /orders/:code: ", failure);
             response.end(Json.encode(ErrorResponse.of(failure, failure.getMessage())));
           });
       });

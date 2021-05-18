@@ -1,4 +1,4 @@
-package tatsumibruno.order.api.commons.handlers.db;
+package tatsumibruno.order.api.commons.handlers;
 
 import io.vertx.core.Future;
 import io.vertx.core.impl.logging.Logger;
