@@ -25,7 +25,7 @@ public enum OrderQueries {
             (id, code, status, created_at, customer_name, customer_email, delivery_address)
             VALUES(nextval('orders_seq'), $1, $2, $3, $4, $5, $6)
             """;
-    private static final String SQL_FIND_BY_CODE = "SELECT id, code, custommer_name, customer_email, delivery_address, status, created_at FROM orders WHERE code = $1";
+    private static final String SQL_FIND_BY_CODE = "SELECT id, code, customer_name, customer_email, delivery_address, status, created_at FROM orders WHERE code = $1";
 
     public Future<Void> insert(OrderDBModel newOrder) {
         DatabaseTransactionHandler transaction = DatabaseHandler.INSTANCE.initTransaction();
