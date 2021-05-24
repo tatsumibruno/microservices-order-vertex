@@ -1,4 +1,4 @@
-package tatsumibruno.order.api.create_order;
+package tatsumibruno.order.api.command;
 
 import lombok.Getter;
 import lombok.ToString;

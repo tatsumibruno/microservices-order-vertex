@@ -1,4 +1,4 @@
-package tatsumibruno.order.api.query_order;
+package tatsumibruno.order.api.query;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServerResponse;
@@ -8,7 +8,7 @@ import io.vertx.core.json.Json;
 import io.vertx.ext.web.Router;
 import tatsumibruno.order.api.commons.ErrorResponse;
 import tatsumibruno.order.api.commons.handlers.ApiHandler;
-import tatsumibruno.order.api.database.OrderQueries;
+import tatsumibruno.order.api.database.OrderRepository;
 import tatsumibruno.order.api.domain.OrderCustomer;
 
 import java.util.UUID;
@@ -27,7 +27,7 @@ public enum QueryOrderApiHandler implements ApiHandler {
                     HttpServerResponse response = ctx.response();
                     String code = ctx.pathParam("code");
                     LOGGER.info("Searching for order " + code);
-                    OrderQueries.INSTANCE.findByCode(UUID.fromString(code))
+                    OrderRepository.INSTANCE.findByCode(UUID.fromString(code))
                             .onSuccess(orderDBModel -> {
                                 final OrderCustomer customer = orderDBModel.getCustomer();
                                 OrderResponse createdOrder = new OrderResponse(

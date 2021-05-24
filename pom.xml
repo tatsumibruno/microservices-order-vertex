@@ -19,7 +19,7 @@
     <vertx.version>4.0.3</vertx.version>
     <junit-jupiter.version>5.7.0</junit-jupiter.version>
 
-    <main.verticle>tatsumibruno.order.api.create_order.CreateOrderApiHandler</main.verticle>
+    <main.verticle>tatsumibruno.order.api.command.CreateOrderApiHandler</main.verticle>
     <launcher.class>io.vertx.core.Launcher</launcher.class>
     <maven.compiler.target>16</maven.compiler.target>
     <maven.compiler.source>16</maven.compiler.source>
@@ -103,6 +103,18 @@
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-engine</artifactId>
       <version>${junit-jupiter.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
+      <version>3.3.3</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-inline</artifactId>
+      <version>3.10.0</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

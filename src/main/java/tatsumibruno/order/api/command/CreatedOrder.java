@@ -1,4 +1,4 @@
-package tatsumibruno.order.api.create_order;
+package tatsumibruno.order.api.command;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;

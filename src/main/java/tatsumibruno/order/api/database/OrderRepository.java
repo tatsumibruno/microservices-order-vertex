@@ -15,17 +15,21 @@ import java.util.List;
 import java.util.TimeZone;
 import java.util.UUID;
 
-public enum OrderQueries {
+public enum OrderRepository {
 
     INSTANCE;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(OrderQueries.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(OrderRepository.class);
     private static final String SQL_INSERT_ORDER = """
             INSERT INTO orders
             (id, code, status, created_at, customer_name, customer_email, delivery_address)
             VALUES(nextval('orders_seq'), $1, $2, $3, $4, $5, $6)
             """;
-    private static final String SQL_FIND_BY_CODE = "SELECT id, code, customer_name, customer_email, delivery_address, status, created_at FROM orders WHERE code = $1";
+    private static final String SQL_FIND_BY_CODE = """
+            SELECT id, code, customer_name, customer_email, delivery_address, status, created_at 
+            FROM orders 
+            WHERE code = $1
+            """;
 
     public Future<Void> insert(OrderDBModel newOrder) {
         DatabaseTransactionHandler transaction = DatabaseHandler.INSTANCE.initTransaction();
@@ -45,6 +49,10 @@ public enum OrderQueries {
                 .executeQuery(SQL_FIND_BY_CODE, List.of(requestCode))
                 .onSuccess(result -> {
                     Preconditions.checkState(result.rowCount() <= 1, "Should have at least 1 order with each code");
+                    if (result.rowCount() == 0) {
+                        promise.fail("Order with code " + requestCode + " doest not exists");
+                        return;
+                    }
                     result.forEach(row -> {
                         final Long id = row.getLong("id");
                         final UUID code = row.getUUID("code");
@@ -58,7 +66,6 @@ public enum OrderQueries {
                                 .setStatus(row.get(OrderStatus.class, "status"))
                         );
                     });
-                    promise.fail("Order with code " + requestCode + " doest not exists");
                 })
                 .onFailure(failure -> {
                     LOGGER.error("Error while executing query " + SQL_FIND_BY_CODE, failure);
@@ -67,5 +74,3 @@ public enum OrderQueries {
         return promise.future();
     }
 }
-
-;

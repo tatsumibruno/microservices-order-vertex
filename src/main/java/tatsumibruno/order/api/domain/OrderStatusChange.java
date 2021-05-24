@@ -1,14 +1,13 @@
-package tatsumibruno.order.api.query_order;
+package tatsumibruno.order.api.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Getter;
 import lombok.ToString;
-import tatsumibruno.order.api.domain.OrderStatus;
 
 @Getter
 @ToString
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class FinishedOrder {
+public class OrderStatusChange {
   private String code;
   private OrderStatus status;
 }

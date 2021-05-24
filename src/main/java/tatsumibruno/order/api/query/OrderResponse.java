@@ -1,4 +1,4 @@
-package tatsumibruno.order.api.query_order;
+package tatsumibruno.order.api.query;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
