@@ -7,14 +7,11 @@ import io.vertx.core.json.Json;
 import io.vertx.kafka.client.consumer.KafkaConsumer;
 import io.vertx.kafka.client.producer.KafkaProducer;
 import io.vertx.kafka.client.producer.KafkaProducerRecord;
-import tatsumibruno.order.api.commons.handlers.DatabaseHandler;
 import tatsumibruno.order.api.commons.handlers.KafkaHandler;
 import tatsumibruno.order.api.commons.infra.KafkaUtils;
 import tatsumibruno.order.api.database.OrderRepository;
 import tatsumibruno.order.api.domain.OrderStatusChange;
 
-import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
 
 import static java.lang.String.format;
@@ -36,13 +33,8 @@ public enum OrdersStatusChangesKafkaHandler implements KafkaHandler {
       String code = orderStatusChange.getCode();
       try {
         OrderRepository.INSTANCE.findByCode(UUID.fromString(code))
-            .onSuccess(orderDbModel -> DatabaseHandler.INSTANCE
-                .initTransaction()
-                .addOperation("UPDATE orders SET status = $1 WHERE id = $2",
-                    List.of(orderStatusChange.getStatus(), orderDbModel.getId()))
-                .addOperation("INSERT INTO orders_history (id, orders_id, status, created_at) VALUES (nextval('orders_history_seq'), $1, $2, $3)",
-                    List.of(orderDbModel.getId(), orderStatusChange.getStatus(), LocalDateTime.now()))
-                .execute()
+            .onSuccess(orderDbModel -> OrderRepository.INSTANCE
+                .updateStatus(orderDbModel.getId(), orderStatusChange.getStatus())
                 .onSuccess($ -> {
                   LOGGER.info("Order " + code + " updated with status " + orderStatusChange.getStatus());
                   orderUpdatesConsumer.commit();
