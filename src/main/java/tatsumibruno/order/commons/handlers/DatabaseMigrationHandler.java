@@ -11,23 +11,23 @@ import org.flywaydb.core.Flyway;
 @AllArgsConstructor(access = AccessLevel.PACKAGE)
 class DatabaseMigrationHandler {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseMigrationHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseMigrationHandler.class);
 
-  private final DatabaseConfiguration configuration;
+    private final DatabaseConfiguration configuration;
 
-  void execute(Vertx vertx, Promise<Void> registerHandler) {
-    vertx.executeBlocking(migrationHandler -> {
-      String jdbcUrl = String.format("jdbc:postgresql://%s:%s/%s", configuration.host(), configuration.port(), configuration.name());
-      Flyway flyway = Flyway.configure()
-        .dataSource(jdbcUrl, configuration.user(), configuration.password())
-        .baselineOnMigrate(true)
-        .load();
-      flyway.migrate();
-    })
-      .onFailure(error -> {
-        LOGGER.error("Error on migrate database", error);
-        registerHandler.fail(error);
-      })
-      .onSuccess(unused -> registerHandler.complete());
-  }
+    void execute(Vertx vertx, Promise<Void> registerHandler) {
+        vertx.executeBlocking(migrationHandler -> {
+            String jdbcUrl = String.format("jdbc:postgresql://%s:%s/%s", configuration.host(), configuration.port(), configuration.name());
+            Flyway flyway = Flyway.configure()
+                    .dataSource(jdbcUrl, configuration.user(), configuration.password())
+                    .baselineOnMigrate(true)
+                    .load();
+            flyway.migrate();
+        })
+        .onSuccess(unused -> registerHandler.complete())
+        .onFailure(error -> {
+            LOGGER.error("Error on migrate database", error);
+            registerHandler.fail(error);
+        });
+    }
 }
