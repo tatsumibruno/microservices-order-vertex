@@ -1,4 +1,4 @@
-package tatsumibruno.order.api.commons.infra;
+package tatsumibruno.order.commons.infra;
 
 import io.vertx.core.Vertx;
 import io.vertx.kafka.client.consumer.KafkaConsumer;

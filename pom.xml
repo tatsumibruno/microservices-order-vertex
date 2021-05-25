@@ -19,7 +19,7 @@
     <vertx.version>4.0.3</vertx.version>
     <junit-jupiter.version>5.7.0</junit-jupiter.version>
 
-    <main.verticle>tatsumibruno.order.api.command.CreateOrderApiHandler</main.verticle>
+    <main.verticle>tatsumibruno.order.command.CreateOrderApiHandler</main.verticle>
     <launcher.class>io.vertx.core.Launcher</launcher.class>
     <maven.compiler.target>16</maven.compiler.target>
     <maven.compiler.source>16</maven.compiler.source>

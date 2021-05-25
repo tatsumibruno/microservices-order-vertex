@@ -1,4 +1,4 @@
-package tatsumibruno.order.api;
+package tatsumibruno.order;
 
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.vertx.core.AbstractVerticle;
@@ -12,11 +12,11 @@ import io.vertx.core.json.Json;
 import io.vertx.core.json.jackson.DatabindCodec;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.BodyHandler;
-import tatsumibruno.order.api.command.CreateOrderApiHandler;
-import tatsumibruno.order.api.command.OrdersStatusChangesKafkaHandler;
-import tatsumibruno.order.api.commons.ErrorResponse;
-import tatsumibruno.order.api.commons.handlers.DatabaseHandler;
-import tatsumibruno.order.api.query.QueryOrderApiHandler;
+import tatsumibruno.order.command.CreateOrderApiHandler;
+import tatsumibruno.order.command.OrdersStatusChangesKafkaHandler;
+import tatsumibruno.order.commons.ErrorResponse;
+import tatsumibruno.order.commons.handlers.DatabaseHandler;
+import tatsumibruno.order.query.QueryOrderApiHandler;
 
 import java.util.TimeZone;
 

@@ -1,8 +1,8 @@
-package tatsumibruno.order.api.command;
+package tatsumibruno.order.command;
 
 import lombok.Getter;
 import lombok.ToString;
-import tatsumibruno.order.api.domain.OrderCustomer;
+import tatsumibruno.order.domain.OrderCustomer;
 
 @Getter
 @ToString

@@ -1,12 +1,12 @@
-package tatsumibruno.order.api.command;
+package tatsumibruno.order.command;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.ToString;
-import tatsumibruno.order.api.commons.Constants;
-import tatsumibruno.order.api.database.OrderDBModel;
-import tatsumibruno.order.api.domain.OrderCustomer;
+import tatsumibruno.order.commons.Constants;
+import tatsumibruno.order.domain.Order;
+import tatsumibruno.order.domain.OrderCustomer;
 
 import java.time.ZonedDateTime;
 import java.util.UUID;
@@ -39,7 +39,7 @@ public class CreatedOrder {
     return customer.deliveryAddress();
   }
 
-  public OrderDBModel toDBModel() {
-    return new OrderDBModel(code, customer);
+  public Order toModel() {
+    return new Order(code, customer);
   }
 }

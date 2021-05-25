@@ -1,10 +1,10 @@
-package tatsumibruno.order.api.query;
+package tatsumibruno.order.query;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.ToString;
-import tatsumibruno.order.api.commons.Constants;
+import tatsumibruno.order.commons.Constants;
 
 import java.time.ZonedDateTime;
 import java.util.UUID;

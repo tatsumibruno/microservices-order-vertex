@@ -1,4 +1,4 @@
-package tatsumibruno.order.api.command;
+package tatsumibruno.order.command;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.impl.logging.Logger;
@@ -7,10 +7,10 @@ import io.vertx.core.json.Json;
 import io.vertx.kafka.client.consumer.KafkaConsumer;
 import io.vertx.kafka.client.producer.KafkaProducer;
 import io.vertx.kafka.client.producer.KafkaProducerRecord;
-import tatsumibruno.order.api.commons.handlers.KafkaHandler;
-import tatsumibruno.order.api.commons.infra.KafkaUtils;
-import tatsumibruno.order.api.database.OrderRepository;
-import tatsumibruno.order.api.domain.OrderStatusChange;
+import tatsumibruno.order.commons.handlers.KafkaHandler;
+import tatsumibruno.order.commons.infra.KafkaUtils;
+import tatsumibruno.order.domain.OrderStatusChange;
+import tatsumibruno.order.infra.OrderRepository;
 
 import java.util.UUID;
 
@@ -33,9 +33,9 @@ public enum OrdersStatusChangesKafkaHandler implements KafkaHandler {
       String code = orderStatusChange.getCode();
       try {
         OrderRepository.INSTANCE.findByCode(UUID.fromString(code))
-            .onSuccess(orderDbModel -> OrderRepository.INSTANCE
-                .updateStatus(orderDbModel.getId(), orderStatusChange.getStatus())
-                .onSuccess($ -> {
+            .onSuccess(order -> OrderRepository.INSTANCE
+                .updateStatus(order.getId(), orderStatusChange.getStatus())
+                .onSuccess(unused -> {
                   LOGGER.info("Order " + code + " updated with status " + orderStatusChange.getStatus());
                   orderUpdatesConsumer.commit();
                 })

@@ -1,4 +1,4 @@
-package tatsumibruno.order.api.database;
+package tatsumibruno.order.infra;
 
 import graphql.com.google.common.base.Preconditions;
 import io.vertx.core.Future;
@@ -6,10 +6,11 @@ import io.vertx.core.Promise;
 import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
 import lombok.NonNull;
-import tatsumibruno.order.api.commons.handlers.DatabaseHandler;
-import tatsumibruno.order.api.commons.handlers.DatabaseTransactionHandler;
-import tatsumibruno.order.api.domain.OrderCustomer;
-import tatsumibruno.order.api.domain.OrderStatus;
+import tatsumibruno.order.commons.handlers.DatabaseHandler;
+import tatsumibruno.order.commons.handlers.DatabaseTransactionHandler;
+import tatsumibruno.order.domain.Order;
+import tatsumibruno.order.domain.OrderCustomer;
+import tatsumibruno.order.domain.OrderStatus;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -32,7 +33,7 @@ public enum OrderRepository {
       WHERE code = $1
       """;
 
-  public Future<Void> insert(OrderDBModel newOrder) {
+  public Future<Void> insert(Order newOrder) {
     DatabaseTransactionHandler transaction = DatabaseHandler.INSTANCE.initTransaction();
     OrderCustomer customer = newOrder.getCustomer();
     transaction.addOperation(SQL_INSERT_ORDER, List.of(newOrder.getCode(),
@@ -44,8 +45,8 @@ public enum OrderRepository {
     return transaction.execute();
   }
 
-  public Future<OrderDBModel> findByCode(UUID requestCode) {
-    final Promise<OrderDBModel> promise = Promise.promise();
+  public Future<Order> findByCode(UUID requestCode) {
+    final Promise<Order> promise = Promise.promise();
     DatabaseHandler.INSTANCE
         .executeQuery(SQL_FIND_BY_CODE, List.of(requestCode))
         .onSuccess(result -> {
@@ -61,7 +62,7 @@ public enum OrderRepository {
             final String customerEmail = row.getString("customer_email");
             final String deliveryAddress = row.getString("delivery_address");
             final OrderCustomer customer = new OrderCustomer(customerName, customerEmail, deliveryAddress);
-            promise.complete(new OrderDBModel(code, customer)
+            promise.complete(new Order(code, customer)
                 .setId(id)
                 .setCreatedAt(row.getLocalDateTime("created_at").atZone(TimeZone.getDefault().toZoneId()))
                 .setStatus(row.get(OrderStatus.class, "status"))

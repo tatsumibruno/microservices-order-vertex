@@ -1,4 +1,4 @@
-package tatsumibruno.order.api.database;
+package tatsumibruno.order.domain;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -6,8 +6,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.Accessors;
-import tatsumibruno.order.api.domain.OrderCustomer;
-import tatsumibruno.order.api.domain.OrderStatus;
 
 import java.time.ZonedDateTime;
 import java.util.UUID;
@@ -17,7 +15,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Accessors(chain = true)
 @EqualsAndHashCode(of = "code")
-public class OrderDBModel {
+public class Order {
     @Setter
     private Long id;
     @Setter

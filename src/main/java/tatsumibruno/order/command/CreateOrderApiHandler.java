@@ -1,4 +1,4 @@
-package tatsumibruno.order.api.command;
+package tatsumibruno.order.command;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServerResponse;
@@ -17,10 +17,10 @@ import io.vertx.json.schema.common.dsl.Keywords;
 import io.vertx.kafka.client.producer.KafkaProducer;
 import io.vertx.kafka.client.producer.KafkaProducerRecord;
 import lombok.AllArgsConstructor;
-import tatsumibruno.order.api.commons.ErrorResponse;
-import tatsumibruno.order.api.commons.handlers.ApiHandler;
-import tatsumibruno.order.api.commons.infra.KafkaUtils;
-import tatsumibruno.order.api.database.OrderRepository;
+import tatsumibruno.order.commons.ErrorResponse;
+import tatsumibruno.order.commons.handlers.ApiHandler;
+import tatsumibruno.order.commons.infra.KafkaUtils;
+import tatsumibruno.order.infra.OrderRepository;
 
 import java.time.ZonedDateTime;
 import java.util.UUID;
@@ -67,7 +67,7 @@ public enum CreateOrderApiHandler implements ApiHandler {
     }
 
     private void persistOrder(KafkaProducer<String, String> producer, HttpServerResponse response, CreatedOrder createdOrder) {
-        OrderRepository.INSTANCE.insert(createdOrder.toDBModel())
+        OrderRepository.INSTANCE.insert(createdOrder.toModel())
                 .onSuccess(unused -> {
                     LOGGER.info("Order created on database, sending to topic 'orders-created'. " + createdOrder);
                     producer.send(KafkaProducerRecord.create("orders-created",

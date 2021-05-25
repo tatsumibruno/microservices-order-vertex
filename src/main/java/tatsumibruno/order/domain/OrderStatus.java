@@ -1,4 +1,4 @@
-package tatsumibruno.order.api.domain;
+package tatsumibruno.order.domain;
 
 public enum OrderStatus {
   OPENED,

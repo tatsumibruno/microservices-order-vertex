@@ -1,4 +1,4 @@
-package tatsumibruno.order.api.domain;
+package tatsumibruno.order.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Getter;

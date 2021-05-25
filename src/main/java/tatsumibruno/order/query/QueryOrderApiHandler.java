@@ -1,4 +1,4 @@
-package tatsumibruno.order.api.query;
+package tatsumibruno.order.query;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServerResponse;
@@ -6,10 +6,10 @@ import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
 import io.vertx.core.json.Json;
 import io.vertx.ext.web.Router;
-import tatsumibruno.order.api.commons.ErrorResponse;
-import tatsumibruno.order.api.commons.handlers.ApiHandler;
-import tatsumibruno.order.api.database.OrderRepository;
-import tatsumibruno.order.api.domain.OrderCustomer;
+import tatsumibruno.order.commons.ErrorResponse;
+import tatsumibruno.order.commons.handlers.ApiHandler;
+import tatsumibruno.order.domain.OrderCustomer;
+import tatsumibruno.order.infra.OrderRepository;
 
 import java.util.UUID;
 

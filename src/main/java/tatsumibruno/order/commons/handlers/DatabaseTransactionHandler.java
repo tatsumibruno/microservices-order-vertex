@@ -1,4 +1,4 @@
-package tatsumibruno.order.api.commons.handlers;
+package tatsumibruno.order.commons.handlers;
 
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
@@ -37,7 +37,7 @@ public class DatabaseTransactionHandler {
                 })
                 .onSuccess(connection -> connection.begin()
                         .onSuccess(transaction -> executeOperations(transaction, connection)
-                                .onSuccess($ -> connection.close()
+                                .onSuccess(unused -> connection.close()
                                         .onSuccess(closeConnectionHandler -> {
                                             LOGGER.info("Transaction with " + operations.size() + " operations completed");
                                             resultHandler.complete();
@@ -64,14 +64,14 @@ public class DatabaseTransactionHandler {
             for (DatabaseTransactionOperation operation : operations) {
                 operationsFutures.add(Future.future(handler -> connection.preparedQuery(operation.query())
                         .execute(Tuple.from(operation.params()))
-                        .onSuccess($ -> handler.complete())
+                        .onSuccess(unused -> handler.complete())
                         .onFailure(failure -> {
                             LOGGER.error("Error on executing query " + operation.query(), failure);
                             handler.fail(failure);
                         })));
             }
             CompositeFuture.all(operationsFutures)
-                    .onSuccess($ -> transaction.commit(handler -> {
+                    .onSuccess(unused -> transaction.commit(handler -> {
                         if (handler.failed()) {
                             LOGGER.error("Error while commiting the transaction", handler.cause());
                             resultHandler.fail(handler.cause());
@@ -79,7 +79,7 @@ public class DatabaseTransactionHandler {
                             resultHandler.complete();
                         }
                     }))
-                    .onFailure(failure -> transaction.rollback($ -> resultHandler.fail("Rolling back transaction because some query has errors")));
+                    .onFailure(failure -> transaction.rollback(unused -> resultHandler.fail("Rolling back transaction because some query has errors")));
         });
     }
 }

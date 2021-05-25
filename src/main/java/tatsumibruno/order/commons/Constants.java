@@ -1,4 +1,4 @@
-package tatsumibruno.order.api.commons;
+package tatsumibruno.order.commons;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;

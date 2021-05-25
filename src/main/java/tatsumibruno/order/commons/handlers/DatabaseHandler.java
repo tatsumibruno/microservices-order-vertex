@@ -1,4 +1,4 @@
-package tatsumibruno.order.api.commons.handlers;
+package tatsumibruno.order.commons.handlers;
 
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
@@ -28,12 +28,12 @@ public enum DatabaseHandler implements InfrastructureHandler {
     System.getProperty("db_password", "postgres")
   );
 
-  private PgPool DB_POOL;
+  private PgPool pool;
 
   @Override
   public Future<Void> register(Vertx vertx) {
     LOGGER.info("Registering DatabaseSetupHandler...");
-    if (nonNull(DB_POOL)) {
+    if (nonNull(pool)) {
       return Future.failedFuture("Database has already been initialized");
     }
     return Future.future(registerHandler -> {
@@ -44,8 +44,8 @@ public enum DatabaseHandler implements InfrastructureHandler {
         .setUser(CONFIGURATION.user())
         .setPassword(CONFIGURATION.password());
       PoolOptions poolOptions = new PoolOptions().setMaxSize(20);
-      DB_POOL = PgPool.pool(vertx, connectOptions, poolOptions);
-      DB_POOL.getConnection()
+      pool = PgPool.pool(vertx, connectOptions, poolOptions);
+      pool.getConnection()
         .onSuccess(connection -> {
           LOGGER.info("DatabaseHandler initialized");
           new DatabaseMigrationHandler(CONFIGURATION).execute(vertx, registerHandler);
@@ -60,14 +60,14 @@ public enum DatabaseHandler implements InfrastructureHandler {
   @Override
   public void closeResources() {
     LOGGER.info("Closing resources on DatabaseSetupHandler...");
-    DB_POOL.close();
+    pool.close();
   }
 
   public Future<RowSet<Row>> executeQuery(String query, List<Object> params) {
-    return new DatabaseQueryHandler(DB_POOL).execute(query, params);
+    return new DatabaseQueryHandler(pool).execute(query, params);
   }
 
   public DatabaseTransactionHandler initTransaction() {
-    return new DatabaseTransactionHandler(DB_POOL);
+    return new DatabaseTransactionHandler(pool);
   }
 }
