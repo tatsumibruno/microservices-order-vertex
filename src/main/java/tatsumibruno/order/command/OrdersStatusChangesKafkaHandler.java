@@ -29,12 +29,12 @@ public enum OrdersStatusChangesKafkaHandler implements KafkaHandler {
     KafkaProducer<String, String> orderUpdatesDlxProducer = KafkaUtils.producer(vertx);
     orderUpdatesConsumer.handler(kafkaRecord -> {
       LOGGER.info(format("Receiving record with key %s on topic %s ", kafkaRecord.key(), kafkaRecord.topic()));
-      OrderStatusChange orderStatusChange = Json.decodeValue(kafkaRecord.value(), OrderStatusChange.class);
-      String code = orderStatusChange.getCode();
       try {
-        OrderRepository.INSTANCE.findByCode(UUID.fromString(code))
+          OrderStatusChange orderStatusChange = Json.decodeValue(kafkaRecord.value(), OrderStatusChange.class);
+          String code = orderStatusChange.getCode();
+          OrderRepository.INSTANCE.findByCode(UUID.fromString(code))
             .onSuccess(order -> OrderRepository.INSTANCE
-                .updateStatus(order.getId(), orderStatusChange.getStatus())
+                .updateStatus(order.getId(), orderStatusChange.getStatus(), orderStatusChange.getTimestamp())
                 .onSuccess(unused -> {
                   LOGGER.info("Order " + code + " updated with status " + orderStatusChange.getStatus());
                   orderUpdatesConsumer.commit();
@@ -49,7 +49,7 @@ public enum OrdersStatusChangesKafkaHandler implements KafkaHandler {
               orderUpdatesConsumer.commit();
             });
       } catch (Exception e) {
-        LOGGER.error("Unexpected error occourred while process order " + code, e);
+        LOGGER.error("Unexpected error occourred while process order " + kafkaRecord.value(), e);
         orderUpdatesConsumer.commit();
       }
     });

@@ -1,5 +1,8 @@
 package tatsumibruno.order;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.util.StdDateFormat;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Launcher;
@@ -18,6 +21,7 @@ import tatsumibruno.order.commons.ErrorResponse;
 import tatsumibruno.order.commons.handlers.DatabaseHandler;
 import tatsumibruno.order.query.QueryOrderApiHandler;
 
+import java.text.SimpleDateFormat;
 import java.util.TimeZone;
 
 public class OrderApiLauncher {
@@ -33,7 +37,7 @@ public class OrderApiLauncher {
     @Override
     public void start(Promise<Void> startFuture) {
       TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
-      DatabindCodec.mapper().registerModule(new JavaTimeModule());
+      configureObjectMapper();
       registerInfrastructureHandlers();
       registerKafkaHandlers();
       Router router = registerApiRouter();
@@ -79,5 +83,12 @@ public class OrderApiLauncher {
         response.end(Json.encode(ErrorResponse.of(failure, failure.getMessage())));
       });
     }
+  }
+
+  private static void configureObjectMapper() {
+    final ObjectMapper objectMapper = DatabindCodec.mapper();
+    objectMapper.registerModule(new JavaTimeModule());
+    objectMapper.setDateFormat(new StdDateFormat());
+    objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
   }
 }
