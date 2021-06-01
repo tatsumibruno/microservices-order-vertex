@@ -21,74 +21,73 @@ import tatsumibruno.order.commons.ErrorResponse;
 import tatsumibruno.order.commons.handlers.DatabaseHandler;
 import tatsumibruno.order.query.QueryOrderApiHandler;
 
-import java.text.SimpleDateFormat;
 import java.util.TimeZone;
 
 public class OrderApiLauncher {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(OrderApiLauncher.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(OrderApiLauncher.class);
 
-  public static void main(String[] args) {
-    Launcher.executeCommand("run", LauncherVerticle.class.getName());
-  }
-
-  public static class LauncherVerticle extends AbstractVerticle {
-
-    @Override
-    public void start(Promise<Void> startFuture) {
-      TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
-      configureObjectMapper();
-      registerInfrastructureHandlers();
-      registerKafkaHandlers();
-      Router router = registerApiRouter();
-      HttpServer httpServer = vertx.createHttpServer();
-      httpServer.requestHandler(router).listen(8000);
+    public static void main(String[] args) {
+        Launcher.executeCommand("run", LauncherVerticle.class.getName());
     }
 
-    @Override
-    public void stop() {
-      DatabaseHandler.INSTANCE.closeResources();
+    public static class LauncherVerticle extends AbstractVerticle {
+
+        @Override
+        public void start(Promise<Void> startFuture) {
+            TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
+            configureObjectMapper();
+            registerInfrastructureHandlers();
+            registerKafkaHandlers();
+            Router router = registerApiRouter();
+            HttpServer httpServer = vertx.createHttpServer();
+            httpServer.requestHandler(router).listen(8000);
+        }
+
+        @Override
+        public void stop() {
+            DatabaseHandler.INSTANCE.closeResources();
+        }
+
+        private void registerInfrastructureHandlers() {
+            DatabaseHandler.INSTANCE.register(vertx);
+        }
+
+        private void registerKafkaHandlers() {
+            OrdersStatusChangesKafkaHandler.INSTANCE.register(vertx);
+        }
+
+        private Router registerApiRouter() {
+            Router router = Router.router(vertx);
+            router.route().handler(BodyHandler.create());
+            CreateOrderApiHandler.INSTANCE.register(vertx, router);
+            QueryOrderApiHandler.INSTANCE.register(vertx, router);
+            registerErrorRoutes(router);
+            return router;
+        }
+
+        private void registerErrorRoutes(Router router) {
+            router.errorHandler(500, routingContext -> {
+                Throwable failure = routingContext.failure();
+                LOGGER.error("Internal error while processing request.", failure);
+                HttpServerResponse response = routingContext.response();
+                response.setStatusCode(500);
+                response.end(Json.encode(ErrorResponse.of(failure, failure.getMessage())));
+            });
+            router.errorHandler(400, routingContext -> {
+                Throwable failure = routingContext.failure();
+                LOGGER.error("Validation error while processing request.", failure);
+                HttpServerResponse response = routingContext.response();
+                response.setStatusCode(400);
+                response.end(Json.encode(ErrorResponse.of(failure, failure.getMessage())));
+            });
+        }
     }
 
-    private void registerInfrastructureHandlers() {
-      DatabaseHandler.INSTANCE.register(vertx);
+    private static void configureObjectMapper() {
+        final ObjectMapper objectMapper = DatabindCodec.mapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.setDateFormat(new StdDateFormat());
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
-
-    private void registerKafkaHandlers() {
-      OrdersStatusChangesKafkaHandler.INSTANCE.register(vertx);
-    }
-
-    private Router registerApiRouter() {
-      Router router = Router.router(vertx);
-      router.route().handler(BodyHandler.create());
-      CreateOrderApiHandler.INSTANCE.register(vertx, router);
-      QueryOrderApiHandler.INSTANCE.register(vertx, router);
-      registerErrorRoutes(router);
-      return router;
-    }
-
-    private void registerErrorRoutes(Router router) {
-      router.errorHandler(500, routingContext -> {
-        Throwable failure = routingContext.failure();
-        LOGGER.error("Internal error while processing request.", failure);
-        HttpServerResponse response = routingContext.response();
-        response.setStatusCode(500);
-        response.end(Json.encode(ErrorResponse.of(failure, failure.getMessage())));
-      });
-      router.errorHandler(400, routingContext -> {
-        Throwable failure = routingContext.failure();
-        LOGGER.error("Validation error while processing request.", failure);
-        HttpServerResponse response = routingContext.response();
-        response.setStatusCode(400);
-        response.end(Json.encode(ErrorResponse.of(failure, failure.getMessage())));
-      });
-    }
-  }
-
-  private static void configureObjectMapper() {
-    final ObjectMapper objectMapper = DatabindCodec.mapper();
-    objectMapper.registerModule(new JavaTimeModule());
-    objectMapper.setDateFormat(new StdDateFormat());
-    objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-  }
 }

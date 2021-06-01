@@ -25,7 +25,7 @@ public enum OrdersStatusChangesKafkaHandler implements KafkaHandler {
   @Override
   public void register(Vertx vertx) {
     LOGGER.info("Registering OrdersStatusChangesKafkaHandler...");
-    KafkaConsumer<String, String> orderUpdatesConsumer = KafkaUtils.consumer(vertx, "order-api");
+    KafkaConsumer<String, String> orderUpdatesConsumer = KafkaUtils.consumer(vertx, "orders-vertx");
     KafkaProducer<String, String> orderUpdatesDlxProducer = KafkaUtils.producer(vertx);
     orderUpdatesConsumer.handler(kafkaRecord -> {
       LOGGER.info(format("Receiving record with key %s on topic %s ", kafkaRecord.key(), kafkaRecord.topic()));
