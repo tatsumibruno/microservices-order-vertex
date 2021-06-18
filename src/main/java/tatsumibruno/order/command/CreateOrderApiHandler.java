@@ -48,6 +48,7 @@ public enum CreateOrderApiHandler implements ApiHandler {
                     LOGGER.info("Receiving new order: " + bodyRequest);
                     OrderRequest orderRequest = Json.decodeValue(bodyRequest, OrderRequest.class);
                     CreatedOrder createdOrder = new CreatedOrder(UUID.randomUUID(), ZonedDateTime.now(), orderRequest.toOrderCustomer());
+                    response.putHeader("content-type", "application/json");
                     persistOrder(producer, response, createdOrder);
                 });
     }
